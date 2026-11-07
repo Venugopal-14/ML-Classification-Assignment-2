@@ -1,5 +1,13 @@
-
 # Breast Cancer Classification Using Machine Learning
+
+M.Tech AIML | Machine Learning Assignment 2 | BITS Pilani
+
+## Live Demo
+
+- Streamlit application: https://ml-classification-assignment-2-jbb27mfj5nxxgxqjyypts3.streamlit.app/
+- GitHub repository: https://github.com/Venugopal-14/ML-Classification-Assignment-2
+
+To try the app, open the link, choose a model in the sidebar and upload `test_data.csv` from this repository. If the app has been idle, Streamlit Cloud may show a "wake up" screen first.
 
 ## 1. Problem Statement
 
@@ -17,33 +25,35 @@ Source URL:
 https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic
 
 - Total Instances: 569
-- Total Features: 30
+- Total Features: 30 (numeric, computed from digitized images of breast mass cell nuclei)
 - Target Classes: 2
 - Benign: 357
 - Malignant: 212
 - Training Records: 455
 - Testing Records: 114
-- Train-Test Split: 80:20
+- Train-Test Split: 80:20 (`random_state=42`, stratified)
 
 Target encoding:
 - 0 = Benign
 - 1 = Malignant
 
-## 3. GitHub Repository Link
+`test_data.csv` contains the 114 test records: 30 feature columns plus a `target` column.
 
-REPLACE_WITH_YOUR_GITHUB_REPOSITORY_URL
+## 3. Machine Learning Models and Evaluation
 
-## 4. Machine Learning Models and Evaluation
+Five classification algorithms were implemented in `ML_Classification_Models.ipynb`:
 
-Five classification algorithms were implemented:
-
-1. Logistic Regression
-2. Decision Tree Classifier
-3. K-Nearest Neighbors
-4. Gaussian Naive Bayes
-5. Support Vector Machine
+| # | Model | Configuration |
+|---|---|---|
+| 1 | Logistic Regression | StandardScaler + LogisticRegression (`max_iter=2000`) |
+| 2 | Decision Tree Classifier | `max_depth=5`, `random_state=42` |
+| 3 | K-Nearest Neighbors | StandardScaler + KNN (`n_neighbors=5`) |
+| 4 | Gaussian Naive Bayes | default parameters |
+| 5 | Support Vector Machine | StandardScaler + SVC (RBF kernel, `probability=True`, `random_state=42`) |
 
 ### Evaluation Metrics
+
+Computed on the 114-record test set (source: `results/comparison.csv`).
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 Score | MCC |
 |---|---:|---:|---:|---:|---:|---:|
@@ -74,21 +84,35 @@ Support Vector Machine (SVM) is the best-performing model on the selected test d
 - F1 Score: 0.9630
 - MCC: 0.9442
 
-## 5. Streamlit Application
+## 4. Streamlit Application
 
-The Streamlit application provides:
+The Streamlit application (`app.py`) provides:
 
 - CSV test dataset upload.
-- Classification model selection.
-- Evaluation metric display.
+- Classification model selection (sidebar).
+- Evaluation metric display (Accuracy, AUC, Precision, Recall, F1, MCC).
 - Confusion matrix.
 - Classification report.
-- Model comparison.
 
-The application loads previously trained models without retraining on uploaded test data.
+The application loads the previously trained models from `model/` and does not retrain them on uploaded data.
 
-Live Application:
-REPLACE_WITH_YOUR_STREAMLIT_APP_URL
+### Input requirements
+
+- A CSV file with exactly 30 feature columns in the same order as the training data, plus a `target` column.
+- `target` must contain only 0 (Benign) and 1 (Malignant), with no missing values.
+
+## 5. Project Architecture
+
+```text
+Notebook (training)                    Streamlit app (inference only)
+-------------------                    ------------------------------
+Load dataset (569 x 30)                Upload CSV (features + target)
+  -> 80:20 stratified split              -> validate columns / target
+  -> train 5 models                      -> load model/<name>.joblib
+  -> evaluate on test set                -> predict + predict_proba
+  -> save models (model/*.joblib)        -> metrics, confusion matrix,
+  -> save results/comparison.csv            classification report
+```
 
 ## 6. Project Structure
 
@@ -98,6 +122,7 @@ ML_Classification_Assignment_2/
 |-- app.py
 |-- requirements.txt
 |-- README.md
+|-- .gitignore
 |-- test_data.csv
 |-- ML_Classification_Models.ipynb
 |
@@ -110,3 +135,35 @@ ML_Classification_Assignment_2/
 |
 |-- results/
     |-- comparison.csv
+```
+
+## 7. Installation
+
+Requires Python 3.11 or 3.12 (the pinned `numpy==1.26.4` does not support newer versions).
+
+```bash
+git clone https://github.com/Venugopal-14/ML-Classification-Assignment-2.git
+cd ML-Classification-Assignment-2
+
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+## 8. Usage
+
+Run the Streamlit app locally:
+
+```bash
+streamlit run app.py
+```
+
+Then:
+
+1. Select a classification model in the sidebar.
+2. Upload `test_data.csv` (or your own CSV in the same format).
+3. Review the metrics, confusion matrix and classification report.
+
+To reproduce the training and evaluation, open `ML_Classification_Models.ipynb` in Jupyter and run all cells. This is optional and is not needed to run the app.
